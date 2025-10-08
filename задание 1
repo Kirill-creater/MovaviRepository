@@ -1,0 +1,27 @@
+import telebot
+import random
+import token_tg 
+
+
+TOKEN = token_tg.TOKEN
+bot = telebot.TeleBot(TOKEN)
+
+
+@bot.message_handler(commands=['start'])
+def com(message:telebot.types.Message):
+    bot.send_message(message.chat.id,"fajfjajifahsjfj")
+
+@bot.message_handler(commands=['help'])
+def hello(message:telebot.types.Message):
+    bot.send_message(message.chat.id,f"Привет {message.from_user.first_name} я бот Спамер если тебе нужно кого-то заспамить пиши его айди")
+
+@bot.message_handler(content_types=['text'])
+def send_message(message:telebot.types.Message):
+    print(f"{message.from_user.first_name}:{message.text}")
+    bot.send_message(message.chat.id,"Привет я бот Спамер если тебе нужно кого-то заспамить пиши его айди")
+
+
+
+print(1)
+bot.polling(non_stop=True,interval=1)
+
