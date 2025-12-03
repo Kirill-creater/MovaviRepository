@@ -1,0 +1,70 @@
+from telebot import TeleBot, types
+from tocken import TOKEN
+import sql_request
+
+
+bot = TeleBot(TOKEN)
+admin = 'Iamadmin'
+
+def cheak_admin1(message:types.Message):
+    print(message.text)
+    if message.text == admin:
+        print(67)
+        bot.send_message(message.chat.id,'вы успешно прошли проверку')
+        Keyboard = types.InlineKeyboardMarkup()
+        Keyboard_Button1 = types.InlineKeyboardButton(text='Создать опрос',callback_data='create_survey')
+        Keyboard.add(Keyboard_Button1)
+        bot.send_message(message.chat.id,'доступные команды:',reply_markup=Keyboard)
+        print(5)
+
+
+
+def create_sur(message:types.Message):
+    try:
+        print(message.text)
+        title = message.text.strip().split('/')[0]
+        description = message.text.strip().split('/')[1]
+        print(f"{title},{description}")
+        sql_request.create_survey(title,description)
+    except Exception as e:
+        print(e)
+        bot.send_message(message.chat.id,'Ошибка!')
+
+def all_surveys():
+    print(sql_request.all_surveys())
+
+
+@bot.message_handler(commands=['start'])
+def start(message:types.Message):
+    print(message.chat.id)
+    sql_request.create_db()
+    bot.send_message(message.chat.id,'Привет пройди новый опрос')
+
+    all_surveys()
+@bot.message_handler(commands=['help'])
+def help(message:types.Message):
+    bot.send_message(message.chat.id,'Support is absent!')
+
+@bot.message_handler(commands=['admin'])
+def cheak_admin(message:types.Message):
+    bot.send_message(message.chat.id,'Пройди проверку напиши админский код!')
+    bot.register_next_step_handler(message,cheak_admin1)
+    
+
+@bot.message_handler()
+def Message_Handler(message:types.Message):
+    bot.send_message(message.chat.id,message.text)
+
+@bot.callback_query_handler(func=lambda callback: True)
+def handle_callback(callback:types.CallbackQuery):
+    print(callback.data)
+    if callback.data == 'create_survey':
+        bot.send_message(callback.message.chat.id,'Введите название и описание через /')
+        bot.register_next_step_handler(callback.message,create_sur)
+
+def main():
+    print('starting...')
+    bot.polling(non_stop=True,interval=1)
+
+if __name__ == '__main__':
+    main()
